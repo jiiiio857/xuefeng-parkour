@@ -329,7 +329,7 @@
 
     <script>
     // ============================================================
-    //  ❄ 雪峰跑酷 — 最终修复稳定版
+    //  ❄ 雪峰跑酷 — 最终全功能合并版 (放大画面 + 镜头跟随)
     // ============================================================
 
     const ASSET_PATHS = {
@@ -370,6 +370,8 @@
     const btnJump       = document.getElementById('btnJump');
 
     let gameState = 'menu', score = 0, lives = 3, cameraX = 0, animFrameId = null;
+    let viewW = GAME_WIDTH; // 动态视野宽度
+    
     const input = { left: false, right: false, up: false, down: false, jump: false, jumpPressed: false };
     let bgmAudio = null, audioCtx = null, bgmStarted = false;
     const images = { player: null, bottle: null, enemy: null };
@@ -408,7 +410,7 @@
         particles = []; cameraX = 0; score = 0; lives = 3; updateHUD();
     }
 
-    // ==================== 坐标缩放核心 ====================
+    // ==================== 坐标缩放核心 (放大镜算法) ====================
     let scaleFactor = 1, offsetX = 0, offsetY = 0, dpr = 1;
 
     function resizeCanvas() {
@@ -421,15 +423,18 @@
         const controls = document.getElementById('mobileControls');
 
         if (r.height > r.width) {
-            // 手机竖屏：画面居中，按键贴画面底部
-            scaleFactor = r.width / GAME_WIDTH;
+            // ★ 手机竖屏：缩减物理视野，让画面大幅放大
+            viewW = 450; 
+            scaleFactor = r.width / viewW;
             offsetX = 0;
-            offsetY = (r.height - GAME_HEIGHT * scaleFactor) / 2;
+            // 稍微靠上一点，给下方留出空间
+            offsetY = r.height * 0.12; 
             const gameBottom = offsetY + GAME_HEIGHT * scaleFactor;
             controls.style.bottom = 'auto'; 
-            controls.style.top = (gameBottom + 15) + 'px';
+            controls.style.top = (gameBottom + 20) + 'px'; // 按键紧贴地平线
         } else {
-            // 电脑/横屏：按比例缩放，按键悬浮
+            // ★ 电脑/横屏：恢复全景
+            viewW = GAME_WIDTH;
             scaleFactor = Math.min(r.width / GAME_WIDTH, r.height / GAME_HEIGHT);
             offsetX = (r.width - GAME_WIDTH * scaleFactor) / 2;
             offsetY = (r.height - GAME_HEIGHT * scaleFactor) / 2;
@@ -451,20 +456,17 @@
         drawHUDIcon();
     }
 
-    // ==================== 资源加载与音效 ====================
     function initAudio() {
         if (!audioCtx) try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
         if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
     }
-
     function playBeep(freq, dur, type='square', vol=0.08) {
         if (!audioCtx) return;
         try {
             const o = audioCtx.createOscillator(), g = audioCtx.createGain();
             o.type = type; o.frequency.setValueAtTime(freq, audioCtx.currentTime);
             g.gain.setValueAtTime(vol, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
-            o.connect(g); g.connect(audioCtx.destination);
-            o.start(); o.stop(audioCtx.currentTime + dur);
+            o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime + dur);
         } catch(e) {}
     }
 
@@ -481,9 +483,7 @@
     }
     function playOnceAudio(path, vol=0.5) { try { const a = new Audio(path); a.volume = vol; a.play().catch(()=>{}); } catch(e) {} }
 
-    function loadImage(src) {
-        return new Promise(resolve => { const img = new Image(); img.onload = () => resolve(img); img.onerror = () => resolve(null); img.src = src; });
-    }
+    function loadImage(src) { return new Promise(resolve => { const img = new Image(); img.onload = () => resolve(img); img.onerror = () => resolve(null); img.src = src; }); }
 
     async function loadAllImages() {
         const [p, b, e] = await Promise.all([loadImage(ASSET_PATHS.player), loadImage(ASSET_PATHS.bottle), loadImage(ASSET_PATHS.enemy)]);
@@ -491,36 +491,23 @@
         imagesLoaded = true; updateEntitySizes();
     }
 
-    // ==================== 占位图 ====================
     function drawPlaceholderPlayer(x, y, w, h, facingRight) {
         ctx.save();
         if (!facingRight) { ctx.translate(x + w/2, 0); ctx.scale(-1,1); x = -w/2; }
-        ctx.fillStyle='#E53935'; ctx.fillRect(x+4,y,w-8,10); ctx.fillRect(x+2,y+6,w-4,6);
-        ctx.fillStyle='#FFCC80'; ctx.fillRect(x+6,y+12,w-12,10); ctx.fillStyle='#000'; ctx.fillRect(x+14,y+14,3,3);
-        ctx.fillStyle='#1E88E5'; ctx.fillRect(x+6,y+22,w-12,10); ctx.fillStyle='#1565C0'; ctx.fillRect(x+6,y+32,7,4); ctx.fillRect(x+w-13,y+32,7,4);
+        ctx.fillStyle='#E53935'; ctx.fillRect(x+4,y,w-8,10); ctx.fillRect(x+2,y+6,w-4,6); ctx.fillStyle='#FFCC80'; ctx.fillRect(x+6,y+12,w-12,10); ctx.fillStyle='#000'; ctx.fillRect(x+14,y+14,3,3); ctx.fillStyle='#1E88E5'; ctx.fillRect(x+6,y+22,w-12,10); ctx.fillStyle='#1565C0'; ctx.fillRect(x+6,y+32,7,4); ctx.fillRect(x+w-13,y+32,7,4);
         ctx.restore();
     }
     function drawPlaceholderBottle(x, y, w, h) {
-        ctx.fillStyle='#4CAF50'; ctx.fillRect(x+4,y+4,w-8,h-4); ctx.fillStyle='#66BB6A'; ctx.fillRect(x+6,y,w-12,6);
-        ctx.fillStyle='rgba(255,255,255,0.5)'; ctx.fillRect(x+6,y+8,3,h-14); ctx.fillStyle='#FFEB3B'; ctx.fillRect(x+5,y+10,w-10,8);
+        ctx.fillStyle='#4CAF50'; ctx.fillRect(x+4,y+4,w-8,h-4); ctx.fillStyle='#66BB6A'; ctx.fillRect(x+6,y,w-12,6); ctx.fillStyle='rgba(255,255,255,0.5)'; ctx.fillRect(x+6,y+8,3,h-14); ctx.fillStyle='#FFEB3B'; ctx.fillRect(x+5,y+10,w-10,8);
     }
     function drawPlaceholderEnemy(x, y, w, h) {
-        ctx.fillStyle='#D4A574'; ctx.fillRect(x+w/2-3,y+h-6,6,8);
-        ctx.fillStyle='#9C27B0'; ctx.beginPath(); ctx.moveTo(x+w/2,y); ctx.lineTo(x+w-2,y+h-6); ctx.lineTo(x+2,y+h-6); ctx.closePath(); ctx.fill();
-        ctx.fillStyle='#6A1B9A'; ctx.beginPath(); ctx.moveTo(x+w/2,y); ctx.lineTo(x+w-4,y+8); ctx.lineTo(x+4,y+8); ctx.closePath(); ctx.fill();
-        ctx.fillStyle='#FFF'; ctx.fillRect(x+8,y+8,6,6); ctx.fillRect(x+w-14,y+8,6,6); ctx.fillStyle='#000'; ctx.fillRect(x+10,y+10,3,3); ctx.fillRect(x+w-12,y+10,3,3);
+        ctx.fillStyle='#D4A574'; ctx.fillRect(x+w/2-3,y+h-6,6,8); ctx.fillStyle='#9C27B0'; ctx.beginPath(); ctx.moveTo(x+w/2,y); ctx.lineTo(x+w-2,y+h-6); ctx.lineTo(x+2,y+h-6); ctx.closePath(); ctx.fill(); ctx.fillStyle='#6A1B9A'; ctx.beginPath(); ctx.moveTo(x+w/2,y); ctx.lineTo(x+w-4,y+8); ctx.lineTo(x+4,y+8); ctx.closePath(); ctx.fill(); ctx.fillStyle='#FFF'; ctx.fillRect(x+8,y+8,6,6); ctx.fillRect(x+w-14,y+8,6,6); ctx.fillStyle='#000'; ctx.fillRect(x+10,y+10,3,3); ctx.fillRect(x+w-12,y+10,3,3);
     }
 
-    // ==================== 逻辑 ====================
-    function spawnParticles(x, y, color, n=10) {
-        for (let i=0;i<n;i++) particles.push({ x,y, vx:(Math.random()-0.5)*4, vy:(Math.random()-1)*3-1, life:1, decay:0.02+Math.random()*0.04, color, size:2+Math.random()*3 });
-    }
-    function updateParticles() {
-        for (let i=particles.length-1;i>=0;i--) { const p=particles[i]; p.x+=p.vx; p.y+=p.vy; p.vy+=0.1; p.life-=p.decay; if (p.life<=0) particles.splice(i,1); }
-    }
-    function drawParticles() {
-        for (const p of particles) { ctx.globalAlpha=p.life; ctx.fillStyle=p.color; ctx.fillRect(p.x-p.size/2,p.y-p.size/2,p.size,p.size); } ctx.globalAlpha=1;
-    }
+    function spawnParticles(x, y, color, n=10) { for (let i=0;i<n;i++) particles.push({ x,y, vx:(Math.random()-0.5)*4, vy:(Math.random()-1)*3-1, life:1, decay:0.02+Math.random()*0.04, color, size:2+Math.random()*3 }); }
+    function updateParticles() { for (let i=particles.length-1;i>=0;i--) { const p=particles[i]; p.x+=p.vx; p.y+=p.vy; p.vy+=0.1; p.life-=p.decay; if (p.life<=0) particles.splice(i,1); } }
+    function drawParticles() { for (const p of particles) { ctx.globalAlpha=p.life; ctx.fillStyle=p.color; ctx.fillRect(p.x-p.size/2,p.y-p.size/2,p.size,p.size); } ctx.globalAlpha=1; }
+    
     function drawHUDIcon() {
         const c = hudIconCtx, w = 22, h = 26; c.clearRect(0,0,w,h);
         if (images.bottle) { c.drawImage(images.bottle, 1, 1, w-2, h-2); }
@@ -530,60 +517,37 @@
     function rectsOverlap(a,b) { return a.x<b.x+b.w && a.x+a.w>b.x && a.y<b.y+b.h && a.y+a.h>b.y; }
 
     function applyPhysics() {
-        player.vy += GRAVITY;
-        if (input.down && !player.onGround) player.vy += 0.45;
-        if (player.vy > MAX_FALL) player.vy = MAX_FALL;
-
-        if (input.left)  { player.vx = -PLAYER_SPEED; player.facingRight = false; }
-        else if (input.right) { player.vx = PLAYER_SPEED; player.facingRight = true; }
-        else player.vx = 0;
-
+        player.vy += GRAVITY; if (input.down && !player.onGround) player.vy += 0.45; if (player.vy > MAX_FALL) player.vy = MAX_FALL;
+        if (input.left) { player.vx = -PLAYER_SPEED; player.facingRight = false; } else if (input.right) { player.vx = PLAYER_SPEED; player.facingRight = true; } else player.vx = 0;
         if (input.jumpPressed && player.onGround) { player.vy = JUMP_FORCE; player.onGround = false; input.jumpPressed = false; }
-
         player.x += player.vx; player.y += player.vy;
 
-        if (player.x < 0) player.x = 0;
-        if (player.x + player.w > WORLD_W) player.x = WORLD_W - player.w;
+        if (player.x < 0) player.x = 0; if (player.x + player.w > WORLD_W) player.x = WORLD_W - player.w;
         if (player.y > GAME_HEIGHT + 50) { killPlayer(); return; }
 
         player.onGround = false;
         for (const plat of platforms) {
             if (!rectsOverlap(player, plat)) continue;
-            const pb = player.y + player.h, pt = player.y;
-            const ppb = pb - player.vy, ppt = pt - player.vy;
-
+            const pb = player.y + player.h, pt = player.y, ppb = pb - player.vy, ppt = pt - player.vy;
             if (player.vy >= 0 && ppb <= plat.y + 4 && pb >= plat.y) {
                 player.y = plat.y - player.h; player.vy = 0; player.onGround = true;
             } else if (player.vy < 0 && ppt >= plat.y + plat.h - 4 && pt <= plat.y + plat.h) {
                 player.y = plat.y + plat.h; player.vy = 0;
             } else if (!player.onGround) {
-                const pr = player.x + player.w, pl = player.x;
-                const ppr = pr - player.vx, ppl = pl - player.vx;
-                if (ppr <= plat.x && pr > plat.x) { player.x = plat.x - player.w; player.vx = 0; }
-                else if (ppl >= plat.x + plat.w && pl < plat.x + plat.w) { player.x = plat.x + plat.w; player.vx = 0; }
+                const pr = player.x + player.w, pl = player.x, ppr = pr - player.vx, ppl = pl - player.vx;
+                if (ppr <= plat.x && pr > plat.x) { player.x = plat.x - player.w; player.vx = 0; } else if (ppl >= plat.x + plat.w && pl < plat.x + plat.w) { player.x = plat.x + plat.w; player.vx = 0; }
             }
         }
-
-        for (const b of bottles) {
-            if (b.collected) continue;
-            if (rectsOverlap(player, b)) { b.collected = true; score += 100; updateHUD(); sfxCollect(); spawnParticles(b.x+b.w/2, b.y+b.h/2, '#4CAF50', 8); }
-        }
-
+        for (const b of bottles) { if (b.collected) continue; if (rectsOverlap(player, b)) { b.collected = true; score += 100; updateHUD(); sfxCollect(); spawnParticles(b.x+b.w/2, b.y+b.h/2, '#4CAF50', 8); } }
         for (const e of enemies) {
-            if (!e.alive) continue;
-            if (!rectsOverlap(player, e)) continue;
+            if (!e.alive) continue; if (!rectsOverlap(player, e)) continue;
             const pb = player.y + player.h;
-            if (player.vy > 0 && pb - player.vy <= e.y + e.h * 0.4) { e.alive = false; player.vy = -6; score += 200; updateHUD(); sfxStomp(); spawnParticles(e.x+e.w/2, e.y+e.h/2, '#9C27B0', 12); }
-            else { hurtPlayer(); }
+            if (player.vy > 0 && pb - player.vy <= e.y + e.h * 0.4) { e.alive = false; player.vy = -6; score += 200; updateHUD(); sfxStomp(); spawnParticles(e.x+e.w/2, e.y+e.h/2, '#9C27B0', 12); } else { hurtPlayer(); }
         }
-
         if (player.x + player.w > GOAL_X && gameState === 'playing') triggerWin();
     }
 
-    function hurtPlayer() {
-        lives--; updateHUD(); sfxDeath();
-        if (lives <= 0) triggerGameOver(); else { player.x = 60; player.y = 300; player.vx = 0; player.vy = -4; cameraX = 0; }
-    }
+    function hurtPlayer() { lives--; updateHUD(); sfxDeath(); if (lives <= 0) triggerGameOver(); else { player.x = 60; player.y = 300; player.vx = 0; player.vy = -4; cameraX = 0; } }
     function killPlayer() { hurtPlayer(); }
     function triggerGameOver() { gameState = 'gameover'; stopBGM(); playOnceAudio(ASSET_PATHS.gameover, 0.5); gameOverScore.textContent = score; gameOverScreen.classList.remove('hidden'); }
     function triggerWin() { gameState = 'win'; stopBGM(); sfxWin(); playOnceAudio(ASSET_PATHS.victory, 0.5); winScore.textContent = score; winScreen.classList.remove('hidden'); }
@@ -592,8 +556,13 @@
     function update() {
         if (gameState !== 'playing') return;
         applyPhysics(); updateEnemies(); updateParticles();
-        const tx = player.x - GAME_WIDTH/2 + player.w/2; cameraX += (tx - cameraX) * 0.12;
-        if (cameraX < 0) cameraX = 0; if (cameraX > WORLD_W - GAME_WIDTH) cameraX = WORLD_W - GAME_WIDTH;
+        
+        // ★ 镜头跟随算法优化：根据当前动态的 viewW 居中人物！
+        const tx = player.x - viewW/2 + player.w/2; 
+        cameraX += (tx - cameraX) * 0.12;
+        if (cameraX < 0) cameraX = 0; 
+        if (cameraX > WORLD_W - viewW) cameraX = WORLD_W - viewW;
+        
         player.animTimer += 0.15; player.animFrame = player.onGround ? (Math.abs(player.vx)>0.5 ? Math.floor(player.animTimer)%4 : 0) : 2;
         for (const b of bottles) { if (!b.collected) b.animT += 0.03; }
     }
@@ -628,10 +597,11 @@
         }
     }
 
+    // ★ 优化了渲染超出边界判定：以 viewW 为基准隐藏视野外的内容
     function drawPlatforms() {
         for (const p of platforms) {
             const sx=p.x-cameraX, sy=p.y;
-            if (sx+p.w<-50||sx>GAME_WIDTH+50) continue;
+            if (sx+p.w<-50||sx>viewW+50) continue; 
             if (p.isGround) {
                 ctx.fillStyle='#8D6E63'; ctx.fillRect(sx,sy,p.w,p.h); ctx.fillStyle='#66BB6A'; ctx.fillRect(sx,sy,p.w,8);
                 ctx.fillStyle='#4CAF50'; for (let gx=sx-(sx%20);gx<sx+p.w;gx+=20) ctx.fillRect(gx+4,sy-3,8,6);
@@ -650,7 +620,7 @@
         for (const b of bottles) {
             if (b.collected) continue;
             const sx=b.x-cameraX, sy=b.y+Math.sin(b.animT)*3;
-            if (sx+b.w<-20||sx>GAME_WIDTH+20) continue;
+            if (sx+b.w<-20||sx>viewW+20) continue;
             if (images.bottle) ctx.drawImage(images.bottle,sx,sy,b.w,b.h); else drawPlaceholderBottle(sx,sy,b.w,b.h);
         }
     }
@@ -658,13 +628,13 @@
         for (const e of enemies) {
             if (!e.alive) continue;
             const sx=e.x-cameraX, sy=e.y;
-            if (sx+e.w<-20||sx>GAME_WIDTH+20) continue;
+            if (sx+e.w<-20||sx>viewW+20) continue;
             if (images.enemy) { ctx.save(); if (e.vx<0) { ctx.translate(sx+e.w/2,0); ctx.scale(-1,1); ctx.drawImage(images.enemy,-e.w/2,sy,e.w,e.h); } else ctx.drawImage(images.enemy,sx,sy,e.w,e.h); ctx.restore(); }
             else drawPlaceholderEnemy(sx,sy,e.w,e.h);
         }
     }
     function drawGoal() {
-        const sx=GOAL_X-cameraX; if (sx<-30||sx>GAME_WIDTH+30) return;
+        const sx=GOAL_X-cameraX; if (sx<-30||sx>viewW+30) return;
         ctx.fillStyle='#BDBDBD'; ctx.fillRect(sx,200,6,240); ctx.fillStyle='#FFD700'; ctx.beginPath(); ctx.arc(sx+3,200,10,0,Math.PI*2); ctx.fill();
         ctx.fillStyle='#FF5722'; ctx.beginPath(); ctx.moveTo(sx+6,210); ctx.lineTo(sx+45,225); ctx.lineTo(sx+6,240); ctx.closePath(); ctx.fill();
         ctx.fillStyle='#FFF'; ctx.font='bold 10px "Courier New"'; ctx.fillText('GOAL',sx+10,232);
@@ -689,7 +659,6 @@
 
     function gameLoop() { update(); render(); animFrameId = requestAnimationFrame(gameLoop); }
 
-    // ==================== 控制 ====================
     function startGame() { initAudio(); startBGM(); resetGameObjects(); gameState = 'playing'; startScreen.classList.add('hidden'); gameOverScreen.classList.add('hidden'); winScreen.classList.add('hidden'); updateHUD(); drawHUDIcon(); }
     function restartGame() { stopBGM(); startGame(); }
     function onKeyDown(e) {
@@ -719,7 +688,6 @@
         const release = (e) => { e.preventDefault(); if (isJumpTrigger) { input.up = false; input.jump = false; } input[dirKey] = false; el.classList.remove('pressed'); };
         el.addEventListener('pointerup', release); el.addEventListener('pointerleave', release); el.addEventListener('pointercancel', release);
     }
-
     function setupJumpButton(el) {
         el.addEventListener('pointerdown', (e) => { e.preventDefault(); if (!input.jump) input.jumpPressed = true; input.jump = true; el.classList.add('pressed'); });
         const release = (e) => { e.preventDefault(); input.jump = false; el.classList.remove('pressed'); };
