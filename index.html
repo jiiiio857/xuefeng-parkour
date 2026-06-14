@@ -6,13 +6,11 @@
     <title>雪峰跑酷</title>
     <style>
         /* ============================================================
-           雪峰跑酷 — 像素风 UI 样式
+           雪峰跑酷 — 像素风 UI 样式 (单手操作版)
            ============================================================ */
         :root {
             --dpad-size: 124px;
-            --btn-size: 38px;
             --center-size: 30px;
-            --jump-size: 58px;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -63,7 +61,6 @@
         }
         .overlay.hidden { display: none; }
 
-        /* 像素边框卡片 */
         .pixel-card {
             background: #1a1a2e;
             border: 3px solid #4a4a6a;
@@ -77,135 +74,63 @@
             max-width: 88vw;
         }
 
-        /* ========== 开始界面 ========== */
         #startScreen .game-title {
-            font-size: clamp(26px, 6vw, 44px);
-            font-weight: bold;
-            color: #FFE082;
-            letter-spacing: 4px;
-            text-shadow:
-                3px 3px 0 #1a1a2e,
-                4px 4px 0 #FF6D00,
-                6px 6px 0 #1a1a2e;
-            margin-bottom: 6px;
+            font-size: clamp(26px, 6vw, 44px); font-weight: bold; color: #FFE082; letter-spacing: 4px;
+            text-shadow: 3px 3px 0 #1a1a2e, 4px 4px 0 #FF6D00, 6px 6px 0 #1a1a2e; margin-bottom: 6px;
         }
-        #startScreen .game-subtitle {
-            font-size: clamp(12px, 2.6vw, 17px);
-            color: #B0BEC5;
-            letter-spacing: 3px;
-            margin-bottom: 32px;
-        }
+        #startScreen .game-subtitle { font-size: clamp(12px, 2.6vw, 17px); color: #B0BEC5; letter-spacing: 3px; margin-bottom: 32px; }
+        
         .btn {
-            display: inline-block;
-            padding: 14px 44px;
-            font-family: inherit;
-            font-size: clamp(15px, 3vw, 22px);
-            font-weight: bold;
-            letter-spacing: 2px;
-            color: #fff;
-            cursor: pointer;
-            border: 3px solid;
-            text-transform: uppercase;
-            transition: transform 0.06s;
-            -webkit-tap-highlight-color: transparent;
-            outline: none;
+            display: inline-block; padding: 14px 44px; font-family: inherit; font-size: clamp(15px, 3vw, 22px);
+            font-weight: bold; letter-spacing: 2px; color: #fff; cursor: pointer; border: 3px solid;
+            text-transform: uppercase; transition: transform 0.06s; outline: none;
         }
         .btn:active { transform: translateY(2px); }
-
-        .btn-start {
-            background: #2E7D32;
-            border-color: #66BB6A;
-            box-shadow: 0 4px 0 #1B5E20, 0 6px 12px rgba(0,0,0,0.5);
-        }
+        .btn-start { background: #2E7D32; border-color: #66BB6A; box-shadow: 0 4px 0 #1B5E20, 0 6px 12px rgba(0,0,0,0.5); }
         .btn-start:active { box-shadow: 0 1px 0 #1B5E20, 0 3px 6px rgba(0,0,0,0.5); }
-
-        .btn-retry {
-            background: #1565C0;
-            border-color: #64B5F6;
-            box-shadow: 0 4px 0 #0D47A1, 0 6px 12px rgba(0,0,0,0.5);
-        }
+        .btn-retry { background: #1565C0; border-color: #64B5F6; box-shadow: 0 4px 0 #0D47A1, 0 6px 12px rgba(0,0,0,0.5); }
         .btn-retry:active { box-shadow: 0 1px 0 #0D47A1, 0 3px 6px rgba(0,0,0,0.5); }
 
-        /* ========== 结束 & 胜利界面 ========== */
-        .end-msg {
-            font-size: clamp(22px, 5vw, 36px);
-            font-weight: bold;
-            letter-spacing: 3px;
-            margin-bottom: 10px;
-        }
+        .end-msg { font-size: clamp(22px, 5vw, 36px); font-weight: bold; letter-spacing: 3px; margin-bottom: 10px; }
         .end-msg.gameover { color: #EF5350; text-shadow: 2px 2px 0 #1a1a2e, 3px 3px 0 #B71C1C; }
         .end-msg.victory { color: #FFD740; text-shadow: 2px 2px 0 #1a1a2e, 3px 3px 0 #FF6D00; }
-        .end-score {
-            font-size: clamp(14px, 2.8vw, 19px);
-            color: #B0BEC5;
-            margin-bottom: 28px;
-            letter-spacing: 2px;
-        }
+        .end-score { font-size: clamp(14px, 2.8vw, 19px); color: #B0BEC5; margin-bottom: 28px; letter-spacing: 2px; }
 
-        /* ========== HUD — 左上角雪碧计数 ========== */
         #hud {
-            position: absolute;
-            top: 12px; left: 14px;
-            z-index: 5;
-            pointer-events: none;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            background: rgba(10,10,18,0.55);
-            border: 2px solid rgba(255,255,255,0.15);
-            padding: 5px 14px 5px 8px;
+            position: absolute; top: 12px; left: 14px; z-index: 5; pointer-events: none;
+            display: flex; align-items: center; gap: 6px; background: rgba(10,10,18,0.55);
+            border: 2px solid rgba(255,255,255,0.15); padding: 5px 14px 5px 8px;
         }
-        #hud .hud-icon {
-            width: 22px; height: 26px;
-            display: inline-block;
-            image-rendering: pixelated;
-        }
-        #hud .hud-score {
-            font-family: 'Courier New', monospace;
-            font-size: clamp(15px, 3vw, 22px);
-            font-weight: bold;
-            color: #fff;
-            letter-spacing: 1px;
-            text-shadow: 1px 1px 0 rgba(0,0,0,0.8);
-            line-height: 1;
-        }
+        #hud .hud-icon { width: 22px; height: 26px; display: inline-block; image-rendering: pixelated; }
+        #hud .hud-score { font-family: 'Courier New', monospace; font-size: clamp(15px, 3vw, 22px); font-weight: bold; color: #fff; text-shadow: 1px 1px 0 rgba(0,0,0,0.8); }
 
         /* ============================================================
-           任天堂经典十字方向键 (D-Pad)
+           十字方向键 (居中放大版)
            ============================================================ */
         #mobileControls {
             position: absolute;
-            /* 默认值，将被 JS 动态计算覆盖以贴合游戏画面 */
-            bottom: 6vh; 
             left: 0; right: 0;
             z-index: 8;
             display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            padding: 0 24px;
+            justify-content: center; /* 让十字键水平居中 */
+            align-items: center;     /* 让十字键垂直居中 */
             pointer-events: none;
         }
-        /* 宽屏设备（平板/桌面）隐藏虚拟按键 */
-        @media (min-width: 1024px) and (hover: hover) {
-            #mobileControls { display: none; }
-        }
+        @media (min-width: 1024px) and (hover: hover) { #mobileControls { display: none; } }
 
-        /* ---- 十字键容器 ---- */
         .dpad-wrap {
             pointer-events: all;
             display: flex;
-            align-items: flex-end;
+            transform: scale(1.5); /* ★ 整体放大 1.5 倍 */
         }
+        
         .dpad {
             position: relative;
-            width: var(--dpad-size);
-            height: var(--dpad-size);
+            width: var(--dpad-size); height: var(--dpad-size);
             filter: drop-shadow(0 3px 4px rgba(0,0,0,0.5));
         }
         .dpad::before {
-            content: '';
-            position: absolute;
-            inset: 0;
+            content: ''; position: absolute; inset: 0;
             background:
                 linear-gradient(#3a3a4a, #2a2a38) no-repeat center / 100% 42px,
                 linear-gradient(#3a3a4a, #2a2a38) no-repeat center / 42px 100%,
@@ -213,37 +138,18 @@
                 radial-gradient(circle at 70% 30%, #222233 35%, transparent 36%),
                 radial-gradient(circle at 30% 70%, #222233 35%, transparent 36%),
                 radial-gradient(circle at 70% 70%, #222233 35%, transparent 36%);
-            border-radius: 12px;
-            border: 2px solid rgba(255,255,255,0.12);
-            z-index: 0;
+            border-radius: 12px; border: 2px solid rgba(255,255,255,0.12); z-index: 0;
         }
         .dpad-btn {
-            position: absolute;
-            background: #3d3d50;
-            border: 1.5px solid rgba(255,255,255,0.18);
-            color: #ccd;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            -webkit-tap-highlight-color: transparent;
-            touch-action: none;
-            z-index: 1;
-            transition: background 0.05s;
+            position: absolute; background: #3d3d50; border: 1.5px solid rgba(255,255,255,0.18);
+            color: #ccd; display: flex; align-items: center; justify-content: center; cursor: pointer;
+            -webkit-tap-highlight-color: transparent; touch-action: none; z-index: 1; transition: background 0.05s;
         }
         .dpad-btn::after {
-            content: '';
-            position: absolute;
-            inset: 2px;
-            border-radius: inherit;
-            background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, transparent 50%);
-            pointer-events: none;
+            content: ''; position: absolute; inset: 2px; border-radius: inherit;
+            background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, transparent 50%); pointer-events: none;
         }
-        .dpad-btn:active, .dpad-btn.pressed {
-            background: #5a5a72;
-            border-color: rgba(255,255,255,0.4);
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.4);
-        }
+        .dpad-btn:active, .dpad-btn.pressed { background: #5a5a72; border-color: rgba(255,255,255,0.4); box-shadow: inset 0 1px 3px rgba(0,0,0,0.4); }
 
         .dpad-up    { top: 2px; left: 50%; transform: translateX(-50%); width: 38px; height: 40px; border-radius: 7px 7px 2px 2px; }
         .dpad-down  { bottom: 2px; left: 50%; transform: translateX(-50%); width: 38px; height: 40px; border-radius: 2px 2px 7px 7px; }
@@ -252,32 +158,11 @@
 
         .dpad-center {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: var(--center-size); height: var(--center-size);
-            border-radius: 50%;
+            width: var(--center-size); height: var(--center-size); border-radius: 50%;
             background: radial-gradient(circle at 40% 40%, #4a4a5a, #2a2a38);
             border: 1.5px solid rgba(255,255,255,0.12); z-index: 2; pointer-events: none;
         }
         .dpad-arrow { font-size: 18px; line-height: 1; text-shadow: 0 1px 2px rgba(0,0,0,0.5); pointer-events: none; }
-
-        /* ---- 跳跃按钮 ---- */
-        .jump-wrap {
-            pointer-events: all;
-            display: flex;
-            align-items: flex-end;
-        }
-        #btnJump {
-            width: var(--jump-size); height: var(--jump-size);
-            border-radius: 50%; border: 2.5px solid rgba(255,200,60,0.5);
-            background: radial-gradient(circle at 40% 35%, #FFB74D, #E65100);
-            color: #fff; font-family: inherit; font-size: 13px; font-weight: bold; letter-spacing: 1px;
-            cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: none;
-            box-shadow: 0 5px 0 #BF360C, 0 7px 14px rgba(0,0,0,0.45);
-            transition: transform 0.05s, box-shadow 0.05s; display: flex; align-items: center; justify-content: center;
-        }
-        #btnJump:active, #btnJump.pressed {
-            transform: translateY(3px); box-shadow: 0 2px 0 #BF360C, 0 3px 6px rgba(0,0,0,0.45);
-            background: radial-gradient(circle at 40% 35%, #FFCC80, #F4511E);
-        }
     </style>
 </head>
 <body>
@@ -321,15 +206,12 @@
                     <div class="dpad-center"></div>
                 </div>
             </div>
-            <div class="jump-wrap">
-                <button id="btnJump">JUMP</button>
-            </div>
         </div>
     </div>
 
     <script>
     // ============================================================
-    //  ❄ 雪峰跑酷 — 最终全功能合并版 (放大画面 + 镜头跟随)
+    //  ❄ 雪峰跑酷 — 单手放大版
     // ============================================================
 
     const ASSET_PATHS = {
@@ -367,10 +249,9 @@
     const btnStart      = document.getElementById('btnStart');
     const btnRetry      = document.getElementById('btnRetry');
     const btnWinRetry   = document.getElementById('btnWinRetry');
-    const btnJump       = document.getElementById('btnJump');
 
     let gameState = 'menu', score = 0, lives = 3, cameraX = 0, animFrameId = null;
-    let viewW = GAME_WIDTH; // 动态视野宽度
+    let viewW = GAME_WIDTH;
     
     const input = { left: false, right: false, up: false, down: false, jump: false, jumpPressed: false };
     let bgmAudio = null, audioCtx = null, bgmStarted = false;
@@ -410,7 +291,6 @@
         particles = []; cameraX = 0; score = 0; lives = 3; updateHUD();
     }
 
-    // ==================== 坐标缩放核心 (放大镜算法) ====================
     let scaleFactor = 1, offsetX = 0, offsetY = 0, dpr = 1;
 
     function resizeCanvas() {
@@ -423,23 +303,22 @@
         const controls = document.getElementById('mobileControls');
 
         if (r.height > r.width) {
-            // ★ 手机竖屏：缩减物理视野，让画面大幅放大
             viewW = 450; 
             scaleFactor = r.width / viewW;
             offsetX = 0;
-            // 稍微靠上一点，给下方留出空间
             offsetY = r.height * 0.12; 
             const gameBottom = offsetY + GAME_HEIGHT * scaleFactor;
-            controls.style.bottom = 'auto'; 
-            controls.style.top = (gameBottom + 20) + 'px'; // 按键紧贴地平线
+            
+            // ★ 让控制区占据画面下方剩余的所有空间，内部居中
+            controls.style.top = gameBottom + 'px'; 
+            controls.style.bottom = '0px'; 
         } else {
-            // ★ 电脑/横屏：恢复全景
             viewW = GAME_WIDTH;
             scaleFactor = Math.min(r.width / GAME_WIDTH, r.height / GAME_HEIGHT);
             offsetX = (r.width - GAME_WIDTH * scaleFactor) / 2;
             offsetY = (r.height - GAME_HEIGHT * scaleFactor) / 2;
             controls.style.top = 'auto';
-            controls.style.bottom = '6vh';
+            controls.style.bottom = '4vh';
         }
     }
 
@@ -477,8 +356,7 @@
 
     function stopBGM() { if (bgmAudio) { bgmAudio.pause(); bgmAudio.currentTime = 0; bgmStarted = false; } }
     function startBGM() {
-        if (bgmStarted) return;
-        initAudio();
+        if (bgmStarted) return; initAudio();
         try { bgmAudio = new Audio(ASSET_PATHS.bgm); bgmAudio.loop = true; bgmAudio.volume = 0.35; bgmAudio.play().then(()=>{ bgmStarted=true; }).catch(()=>{}); } catch(e) {}
     }
     function playOnceAudio(path, vol=0.5) { try { const a = new Audio(path); a.volume = vol; a.play().catch(()=>{}); } catch(e) {} }
@@ -497,12 +375,8 @@
         ctx.fillStyle='#E53935'; ctx.fillRect(x+4,y,w-8,10); ctx.fillRect(x+2,y+6,w-4,6); ctx.fillStyle='#FFCC80'; ctx.fillRect(x+6,y+12,w-12,10); ctx.fillStyle='#000'; ctx.fillRect(x+14,y+14,3,3); ctx.fillStyle='#1E88E5'; ctx.fillRect(x+6,y+22,w-12,10); ctx.fillStyle='#1565C0'; ctx.fillRect(x+6,y+32,7,4); ctx.fillRect(x+w-13,y+32,7,4);
         ctx.restore();
     }
-    function drawPlaceholderBottle(x, y, w, h) {
-        ctx.fillStyle='#4CAF50'; ctx.fillRect(x+4,y+4,w-8,h-4); ctx.fillStyle='#66BB6A'; ctx.fillRect(x+6,y,w-12,6); ctx.fillStyle='rgba(255,255,255,0.5)'; ctx.fillRect(x+6,y+8,3,h-14); ctx.fillStyle='#FFEB3B'; ctx.fillRect(x+5,y+10,w-10,8);
-    }
-    function drawPlaceholderEnemy(x, y, w, h) {
-        ctx.fillStyle='#D4A574'; ctx.fillRect(x+w/2-3,y+h-6,6,8); ctx.fillStyle='#9C27B0'; ctx.beginPath(); ctx.moveTo(x+w/2,y); ctx.lineTo(x+w-2,y+h-6); ctx.lineTo(x+2,y+h-6); ctx.closePath(); ctx.fill(); ctx.fillStyle='#6A1B9A'; ctx.beginPath(); ctx.moveTo(x+w/2,y); ctx.lineTo(x+w-4,y+8); ctx.lineTo(x+4,y+8); ctx.closePath(); ctx.fill(); ctx.fillStyle='#FFF'; ctx.fillRect(x+8,y+8,6,6); ctx.fillRect(x+w-14,y+8,6,6); ctx.fillStyle='#000'; ctx.fillRect(x+10,y+10,3,3); ctx.fillRect(x+w-12,y+10,3,3);
-    }
+    function drawPlaceholderBottle(x, y, w, h) { ctx.fillStyle='#4CAF50'; ctx.fillRect(x+4,y+4,w-8,h-4); ctx.fillStyle='#66BB6A'; ctx.fillRect(x+6,y,w-12,6); ctx.fillStyle='rgba(255,255,255,0.5)'; ctx.fillRect(x+6,y+8,3,h-14); ctx.fillStyle='#FFEB3B'; ctx.fillRect(x+5,y+10,w-10,8); }
+    function drawPlaceholderEnemy(x, y, w, h) { ctx.fillStyle='#D4A574'; ctx.fillRect(x+w/2-3,y+h-6,6,8); ctx.fillStyle='#9C27B0'; ctx.beginPath(); ctx.moveTo(x+w/2,y); ctx.lineTo(x+w-2,y+h-6); ctx.lineTo(x+2,y+h-6); ctx.closePath(); ctx.fill(); ctx.fillStyle='#6A1B9A'; ctx.beginPath(); ctx.moveTo(x+w/2,y); ctx.lineTo(x+w-4,y+8); ctx.lineTo(x+4,y+8); ctx.closePath(); ctx.fill(); ctx.fillStyle='#FFF'; ctx.fillRect(x+8,y+8,6,6); ctx.fillRect(x+w-14,y+8,6,6); ctx.fillStyle='#000'; ctx.fillRect(x+10,y+10,3,3); ctx.fillRect(x+w-12,y+10,3,3); }
 
     function spawnParticles(x, y, color, n=10) { for (let i=0;i<n;i++) particles.push({ x,y, vx:(Math.random()-0.5)*4, vy:(Math.random()-1)*3-1, life:1, decay:0.02+Math.random()*0.04, color, size:2+Math.random()*3 }); }
     function updateParticles() { for (let i=particles.length-1;i>=0;i--) { const p=particles[i]; p.x+=p.vx; p.y+=p.vy; p.vy+=0.1; p.life-=p.decay; if (p.life<=0) particles.splice(i,1); } }
@@ -519,7 +393,10 @@
     function applyPhysics() {
         player.vy += GRAVITY; if (input.down && !player.onGround) player.vy += 0.45; if (player.vy > MAX_FALL) player.vy = MAX_FALL;
         if (input.left) { player.vx = -PLAYER_SPEED; player.facingRight = false; } else if (input.right) { player.vx = PLAYER_SPEED; player.facingRight = true; } else player.vx = 0;
+        
+        // ★ 核心：按下触发按键并且在地面上时，触发跳跃
         if (input.jumpPressed && player.onGround) { player.vy = JUMP_FORCE; player.onGround = false; input.jumpPressed = false; }
+        
         player.x += player.vx; player.y += player.vy;
 
         if (player.x < 0) player.x = 0; if (player.x + player.w > WORLD_W) player.x = WORLD_W - player.w;
@@ -557,11 +434,8 @@
         if (gameState !== 'playing') return;
         applyPhysics(); updateEnemies(); updateParticles();
         
-        // ★ 镜头跟随算法优化：根据当前动态的 viewW 居中人物！
-        const tx = player.x - viewW/2 + player.w/2; 
-        cameraX += (tx - cameraX) * 0.12;
-        if (cameraX < 0) cameraX = 0; 
-        if (cameraX > WORLD_W - viewW) cameraX = WORLD_W - viewW;
+        const tx = player.x - viewW/2 + player.w/2; cameraX += (tx - cameraX) * 0.12;
+        if (cameraX < 0) cameraX = 0; if (cameraX > WORLD_W - viewW) cameraX = WORLD_W - viewW;
         
         player.animTimer += 0.15; player.animFrame = player.onGround ? (Math.abs(player.vx)>0.5 ? Math.floor(player.animTimer)%4 : 0) : 2;
         for (const b of bottles) { if (!b.collected) b.animT += 0.03; }
@@ -597,7 +471,6 @@
         }
     }
 
-    // ★ 优化了渲染超出边界判定：以 viewW 为基准隐藏视野外的内容
     function drawPlatforms() {
         for (const p of platforms) {
             const sx=p.x-cameraX, sy=p.y;
@@ -648,9 +521,7 @@
         const renderOffsetX = offsetX * dpr;
         const renderOffsetY = offsetY * dpr;
 
-        ctx.setTransform(renderScale, 0, 0, renderScale, 0, 0);
-        drawFullscreenBackground();
-
+        ctx.setTransform(renderScale, 0, 0, renderScale, 0, 0); drawFullscreenBackground();
         ctx.setTransform(renderScale, 0, 0, renderScale, renderOffsetX, renderOffsetY);
         drawPlatforms(); drawGoal(); drawBottles(); drawEnemies(); drawPlayer(); drawParticles();
 
@@ -661,6 +532,7 @@
 
     function startGame() { initAudio(); startBGM(); resetGameObjects(); gameState = 'playing'; startScreen.classList.add('hidden'); gameOverScreen.classList.add('hidden'); winScreen.classList.add('hidden'); updateHUD(); drawHUDIcon(); }
     function restartGame() { stopBGM(); startGame(); }
+    
     function onKeyDown(e) {
         if (gameState==='menu') { if (e.key==='Enter'||e.key===' ') { e.preventDefault(); startGame(); return; } }
         if (gameState==='gameover'||gameState==='win') { if (e.key==='Enter'||e.key===' ') { e.preventDefault(); restartGame(); return; } }
@@ -688,11 +560,6 @@
         const release = (e) => { e.preventDefault(); if (isJumpTrigger) { input.up = false; input.jump = false; } input[dirKey] = false; el.classList.remove('pressed'); };
         el.addEventListener('pointerup', release); el.addEventListener('pointerleave', release); el.addEventListener('pointercancel', release);
     }
-    function setupJumpButton(el) {
-        el.addEventListener('pointerdown', (e) => { e.preventDefault(); if (!input.jump) input.jumpPressed = true; input.jump = true; el.classList.add('pressed'); });
-        const release = (e) => { e.preventDefault(); input.jump = false; el.classList.remove('pressed'); };
-        el.addEventListener('pointerup', release); el.addEventListener('pointerleave', release); el.addEventListener('pointercancel', release);
-    }
     function preventTouch(e) { e.preventDefault(); }
 
     btnStart.addEventListener('click', ()=>{ initAudio(); startGame(); }); btnStart.addEventListener('touchend', (e)=>{ e.preventDefault(); initAudio(); startGame(); });
@@ -701,9 +568,12 @@
 
     async function init() {
         resizeCanvas(); drawHUDIcon();
-        setupDPadButton(document.getElementById('dpadUp'), 'up', true); setupDPadButton(document.getElementById('dpadDown'), 'down', false);
-        setupDPadButton(document.getElementById('dpadLeft'), 'left', false); setupDPadButton(document.getElementById('dpadRight'), 'right', false);
-        setupJumpButton(btnJump);
+        
+        // ★ 核心绑定：为向上的按键开启 isJumpTrigger = true
+        setupDPadButton(document.getElementById('dpadUp'), 'up', true); 
+        setupDPadButton(document.getElementById('dpadDown'), 'down', false);
+        setupDPadButton(document.getElementById('dpadLeft'), 'left', false); 
+        setupDPadButton(document.getElementById('dpadRight'), 'right', false);
 
         window.addEventListener('keydown', onKeyDown); window.addEventListener('keyup', onKeyUp);
         canvas.addEventListener('touchstart', preventTouch, {passive:false}); canvas.addEventListener('touchmove',  preventTouch, {passive:false}); canvas.addEventListener('touchend',   preventTouch, {passive:false});
