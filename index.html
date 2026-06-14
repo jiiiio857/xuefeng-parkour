@@ -6,7 +6,7 @@
     <title>雪峰跑酷</title>
     <style>
         /* ============================================================
-           雪峰跑酷 — 像素风 UI 样式 (单手操作版)
+           雪峰跑酷 — 像素风 UI 样式 (单手操作 + 优化高度版)
            ============================================================ */
         :root {
             --dpad-size: 124px;
@@ -211,7 +211,7 @@
 
     <script>
     // ============================================================
-    //  ❄ 雪峰跑酷 — 单手放大版
+    //  ❄ 雪峰跑酷 — 终极单手放大优化版 (按键位置提升)
     // ============================================================
 
     const ASSET_PATHS = {
@@ -309,9 +309,9 @@
             offsetY = r.height * 0.12; 
             const gameBottom = offsetY + GAME_HEIGHT * scaleFactor;
             
-            // ★ 让控制区占据画面下方剩余的所有空间，内部居中
+            // ★ 修改这里：给底部留出 10vh (大约屏幕高度10%) 的安全区，这样按键整体就会往上抬升，避开手机下巴和横条
             controls.style.top = gameBottom + 'px'; 
-            controls.style.bottom = '0px'; 
+            controls.style.bottom = '10vh'; 
         } else {
             viewW = GAME_WIDTH;
             scaleFactor = Math.min(r.width / GAME_WIDTH, r.height / GAME_HEIGHT);
@@ -569,7 +569,6 @@
     async function init() {
         resizeCanvas(); drawHUDIcon();
         
-        // ★ 核心绑定：为向上的按键开启 isJumpTrigger = true
         setupDPadButton(document.getElementById('dpadUp'), 'up', true); 
         setupDPadButton(document.getElementById('dpadDown'), 'down', false);
         setupDPadButton(document.getElementById('dpadLeft'), 'left', false); 
